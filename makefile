@@ -2,20 +2,24 @@
 CC = gcc
 
 # Compiler flags
-FLAGS = -g -Wall -Wextra
+FLAGS = -g -Wall -Wextra -I includes
 EXE = 537make
 
 # Dir for clang static analyzer
 SCAN_BUILD_DIR = out/scan_build/
+
+# Add VPATH
+VPATH=src
+
 
 SRCDIR = src
 INCLDIR = includes
 OUTDIR = out
 
 # Grab source files
-SOURCES := $(wildcard $(SRCDIR)/*.c)
+SOURCES := $(wildcard *.c)
 INCLUDES := $(wildcard $(INCLDIR)/*.h)
-OBJECTS := $(patsubst %.c, $(OUTDIR)/%.o, $(SOURCES))
+OBJECTS := $(patsubst $(SRCDIR)%.c, $(OUTDIR)/%.o, $(SRCDIR)/..)
 
 default: $(OUTDIR)/$(EXE) 
 

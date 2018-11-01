@@ -5,7 +5,7 @@ CMakeLists.txt
 .idea
 *.swp
 
-
+.__*
 ### C ###
 # Prerequisites
 *.d
