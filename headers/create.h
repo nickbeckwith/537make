@@ -1,0 +1,1 @@
+int runCmd(char *cmd);
