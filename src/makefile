@@ -10,13 +10,19 @@ EXE = 537make
 SCAN_BUILD_DIR = ../scan_build/
 
 SOURCES = build_spec.c parser.c tools.c
-OBJECTS = build_spec.o parser.o tools.o
+OBJECTS_WITHOUT_MAIN = build_spec.o parser.o tools.o
+OBJECTS = $(OBJECTS_WITHOUT_MAIN)
 
 default: $(EXE)
 
 $(EXE): $(OBJECTS)
 	@$(CC) $(OBJECTS) $(CFLAGS) -o $(EXE)
 	@echo "Linking Complete!"
+
+.PHONY:
+lib:	$(OBJECTS_WITHOUT_MAIN)
+	@ar rcs iDUT.a $(OBJECTS_WITHOUT_MAIN)
+	@echo "Library Created!"
 
 build_spec.o: build_spec.c build_spec.h
 	@$(CC) $(CFLAGS) -c build_spec.c
@@ -32,7 +38,7 @@ tools.o:	tools.c tools.h
 
 .PHONY: clean
 clean:
-	@rm -f *.o $(EXE)
+	@rm -f *.o *.a $(EXE)
 	@rm -rf $(SCAN_BUILD_DIR)
 	@echo "Cleaned!"
 
