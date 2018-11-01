@@ -12,7 +12,7 @@ struct build_list_t {
 };
 
 
-make_t * readAll(char *filename);
+build_list_t * readAll(char *filename);
 
 // private methods that would help
 void add_dependent(build_t build, char * dependent);
