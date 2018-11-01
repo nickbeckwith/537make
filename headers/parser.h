@@ -17,3 +17,4 @@ build_list_t * readAll(char *filename);
 // private methods that would help
 void add_dependent(build_t build, char * dependent);
 void add_cmd(build_t build, char * cmd);
+void add_build(build_list_t, build_t build);
