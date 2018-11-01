@@ -49,5 +49,5 @@ void addCmd(build_t *build, char *cmd);
  * @param list
  * @param build adds build target to list
  */
-void addBuild(build_list_t *list, build_t build);
+void addBuild(build_list_t *list, build_t *build);
 #endif //P3_BUILD_SPEC_H

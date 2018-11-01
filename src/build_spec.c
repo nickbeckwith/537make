@@ -81,11 +81,11 @@ void addCmd(build_t *build, char *cmd) {
  * @param list
  * @param build adds build target to list
  */
-void addBuild(build_list_t *list, build_t build) {
+void addBuild(build_list_t *list, build_t *build) {
 	if (list->len >= MAX_OTHERS) {
 		fprintf(stderr, "Error: Exceeded max size of build targets\n");
 		exit(EXIT_FAILURE);
 	}
-	list->list[list->list] = build;
+	list->list[list->len] = build;
 }
 

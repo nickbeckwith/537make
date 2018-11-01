@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "parser.h"
 
 build_list_t * readAll(char *filename) {
