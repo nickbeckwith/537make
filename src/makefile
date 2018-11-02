@@ -1,6 +1,6 @@
 # the compiler
 CC = gcc
-
+CC++ = g++
 # Compiler flags
 CFLAGS = -g -Wall -Wextra
 
@@ -12,6 +12,7 @@ SCAN_BUILD_DIR = ../scan_build/
 SOURCES = build_spec.c parser.c tools.c
 OBJECTS_WITHOUT_MAIN = build_spec.o parser.o tools.o
 OBJECTS = $(OBJECTS_WITHOUT_MAIN)
+TEST_OBJECTS = test_main.o test_parser.o 
 
 default: $(EXE)
 
@@ -19,10 +20,15 @@ $(EXE): $(OBJECTS)
 	@$(CC) $(OBJECTS) $(CFLAGS) -o $(EXE)
 	@echo "Linking Complete!"
 
-.PHONY:
-lib:	$(OBJECTS_WITHOUT_MAIN)
-	@ar rcs iDUT.a $(OBJECTS_WITHOUT_MAIN)
-	@echo "Library Created!"
+test: $(TEST_OBJECTS) $(OBJECTS_WITHOUT_MAIN)
+	@$(CC++) $(TEST_OBJECTS) $(OBJECTS_WITHOUT_MAIN) -o test
+	./test
+
+test_parser.o: test_parser.cpp
+	@$(CC++) -c test_parser.cpp
+
+test_main.o: test_main.cpp
+	@$(CC++) -c test_main.cpp
 
 build_spec.o: build_spec.c build_spec.h
 	@$(CC) $(CFLAGS) -c build_spec.c
