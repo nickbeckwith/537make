@@ -18,12 +18,11 @@ build_list_t * readAll(char *filename) {
         while(getDep(file_pointer) != NULL) {
                 ((return_file->dependents)* + return_file->dependents_len)* = getDep(file_pointer);
                 // MAY NOT NEED TO INCLUDE, DEPENDING OTHER FUNCTIONS
-		return_file->dependents_len++;
+                return_file->dependents_len++;
         }
 
 
 }
-
 
 /**
  * Assumes this is called while fptr is on first column
@@ -31,10 +30,10 @@ build_list_t * readAll(char *filename) {
  * and returns "target"
  */
 char * getTarget(FILE *fptr) {
-	char *target = (char *) mallocWrapper(MAX_FILE_SIZE * sizeof(char));
-	fscanf(fptr, "%s:", target);
-	return target;
-	//TODO ensure that fscanf only gets target if target is on first column
+        char *target = (char *) mallocWrapper(MAX_FILE_LEN * sizeof(char));
+        fscanf(fptr, "%s:", target);
+        return target;
+        //TODO ensure that fscanf only gets target if target is on first column
 }
 
 char * getDep(FILE *fptr) {
@@ -43,12 +42,13 @@ char * getDep(FILE *fptr) {
         return cmd;
 }
 
+
 char * getCmd(FILE *fptr) {
-	char *cmd = (char *) mallocWrapper(MAX_SIZE_OTHER * sizeof(char));
-	fscanf(fptr, "%s", cmd);
-	return cmd;
+        char *cmd = (char *) mallocWrapper(MAX_CMD_LEN * sizeof(char));
+        fscanf(fptr, "%s", cmd);
+        return cmd;
 }
 
 
-// TODO Write fscanf wrapper that takes fscanf output as input and 
+// TODO Write fscanf wrapper that takes fscanf output as input and
 // does error handling. i.e. scanErr(fscanf(...));
