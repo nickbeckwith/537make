@@ -41,6 +41,7 @@ void buildFree(build_t *build) {
         }
         free(build->cmds);
 }
+
 void buildListFree(build_list_t *list) {
         for (int i = 0; i < list->len; i++) {
                 buildFree(*list->list);
@@ -60,6 +61,8 @@ void addDependent(build_t *build, char *dependent) {
                 exit(EXIT_FAILURE);
         }
         build->dependents[build->dependents_len] = dependent;
+        // Increments dependents length
+        build->dependents_len++;
 }
 
 /**
@@ -73,6 +76,8 @@ void addCmd(build_t *build, char *cmd) {
                 exit(EXIT_FAILURE);
         }
         build->cmds[build->cmds_len] = cmd;
+        // Increments commands length
+        build->cmds_len++;
 }
 
 /**
