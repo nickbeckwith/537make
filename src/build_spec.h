@@ -1,6 +1,10 @@
 #ifndef P3_BUILD_SPEC_H
 #define P3_BUILD_SPEC_H
 
+#define MAX_FILE_LEN 255
+#define MAX_CMD_LEN  1024     // might change to SC_ARG_MAX
+#define MAX_OTHERS_LEN 1024
+
 typedef struct {
    char * target;       // the target name
    char ** dependents;  // list of dependents

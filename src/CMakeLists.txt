@@ -1,15 +1,10 @@
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 
-set(NON_MAIN_SRC build_spec.c parser.c tools.c)
+set(NON_MAIN_SRC build_spec.c parser.c tools.c command.c command.h)
+set(TESTS test_main.cpp test_parser.cpp test_command.cpp)
 
-add_library(SRC_LIB
-        build_spec.c
-        parser.c
-        tools.c
-        )
-
-add_executable(537make main.c)
+add_executable(537make main.c ${NON_MAIN_SRC})
 target_link_libraries(537make SRC_LIB)
 
-add_executable(TestAll test_main.cpp test_parser.cpp ${NON_MAIN_SRC})
+add_executable(TestAll ${TESTS} ${NON_MAIN_SRC})
