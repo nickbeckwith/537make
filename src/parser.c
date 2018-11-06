@@ -11,11 +11,12 @@
 // Privately defined
 char * getTarget(FILE *fptr);
 char * getDep(char *cptr);
-char * getCmd(FILE *fptr);
+char * getCmd(char *cptr);
+void checkforTab(char *cptr);
 
 build_t * readAll(char *filename) {
         build_t * return_file = NULL;
-        buildInit();
+        buildInit(return_file);
         FILE * file_pointer;
         file_pointer = fopen(filename, "r");
 
@@ -30,21 +31,34 @@ build_t * readAll(char *filename) {
         // return_file->target = getTarget(file_pointer);;      
 
 
-        // Dependents: Creates line pointer, stores pointer to each word as dependent
+        // Dependents: Creates line pointer, set pointers in return file to each word
         char * line_ptr;
-        line_ptr = (char *) malloc(sizeof(char) * MAX_FILE_LEN);
+        line_ptr = malloc(sizeof(char) * MAX_FILE_LEN);
         fgets(line_ptr, MAX_FILE_LEN, file_pointer);
 
         char * temp_dependent_ptr;
 
-        while (line_ptr != NULL) {
+        while (*line_ptr != NULL) {
                 temp_dependent_ptr = getDep(line_ptr);
-                printf("%c\n", *temp_dependent_ptr);
                 // addDependent(getDep(file_pointer));
-                while (temp_dependent_ptr != NULL) {
+                while (*(temp_dependent_ptr) != NULL) {
                         temp_dependent_ptr++;
                         line_ptr++;
-                        printf("%c\n", *line_ptr);
+                }
+                line_ptr++;
+         }
+        
+         // Cmds: Set line pointer to new line, check for tab, set pointers in return file to each word
+        fgets(line_ptr, MAX_FILE_LEN, file_pointer);
+
+        checkforTab(line_ptr);
+
+        while (*line_ptr != NULL) {
+                temp_dependent_ptr = getDep(line_ptr);
+                // addCmd(getCmd(file_pointer));
+                while (*(temp_dependent_ptr) != NULL) {
+                        temp_dependent_ptr++;
+                        line_ptr++;
                 }
                 line_ptr++;
          }
@@ -56,7 +70,7 @@ build_t * readAll(char *filename) {
 /**
  * Assumes this is called while fptr is on first column
  * Advances fptr to target and consumes "target:"
- * and returns "target"
+ * and returns "target:"
  */
 char * getTarget(FILE *fptr) {
         char *target = (char *) mallocWrapper(MAX_FILE_LEN * sizeof(char));
@@ -82,13 +96,22 @@ char * getDep(char *cptr) {
 }
 
 
-char * getCmd(FILE *fptr) {
+char * getCmd(char *cptr) {
         char *cmd = (char *) mallocWrapper(MAX_CMD_LEN * sizeof(char));
-        fscanf(fptr, "%s", cmd);
+        sscanf(cptr, "%s", cmd);
         return cmd;
 }
 
+void checkforTab(char *cptr) {
+        int space_counter = 0;
+        if (*cptr != '\t') {
+                while(*(cptr + space_counter) == ' ') {
+                        space_counter++;
+                }
+                printf("makefile:2: *** missing separator (did you mean TAB instead of %d spaces?).  Stop.\n", space_counter);
+                exit(1);
+        }
+}
 
 // TODO Write fscanf wrapper that takes fscanf output as input and
 // does error handling. i.e. scanErr(fscanf(...));
-
