@@ -15,8 +15,7 @@ char * getCmd(char *cptr);
 void checkforTab(char *cptr);
 
 build_t * readAll(char *filename) {
-        build_t * return_file = NULL;
-        buildInit(return_file);
+		build_t *return_file = buildInit();
         FILE * file_pointer;
         file_pointer = fopen(filename, "r");
 
@@ -33,15 +32,15 @@ build_t * readAll(char *filename) {
 
         // Dependents: Creates line pointer, set pointers in return file to each word
         char * line_ptr;
-        line_ptr = malloc(sizeof(char) * MAX_FILE_LEN);
+        line_ptr = (char *) malloc(sizeof(char) * MAX_FILE_LEN);
         fgets(line_ptr, MAX_FILE_LEN, file_pointer);
 
         char * temp_dependent_ptr;
 
-        while (*line_ptr != NULL) {
+        while (*line_ptr != '\0') {
                 temp_dependent_ptr = getDep(line_ptr);
                 // addDependent(getDep(file_pointer));
-                while (*(temp_dependent_ptr) != NULL) {
+                while (*(temp_dependent_ptr) != '\0') {
                         temp_dependent_ptr++;
                         line_ptr++;
                 }
@@ -53,10 +52,10 @@ build_t * readAll(char *filename) {
 
         checkforTab(line_ptr);
 
-        while (*line_ptr != NULL) {
+        while (*line_ptr != '\0') {
                 temp_dependent_ptr = getDep(line_ptr);
                 // addCmd(getCmd(file_pointer));
-                while (*(temp_dependent_ptr) != NULL) {
+                while (*(temp_dependent_ptr) != '\0') {
                         temp_dependent_ptr++;
                         line_ptr++;
                 }
