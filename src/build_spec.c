@@ -7,12 +7,10 @@
 #define MAX_CMD_LEN  1024     // might change to SC_ARG_MAX
 #define MAX_OTHERS_LEN 1024
 
-/**
- *
- * @param build returns pointer to allocated build
- */
-void buildInit(build_t *build) {
-        build = (build_t *) mallocWrapper(sizeof(build_t));
+void buildFree(build_t *build);
+
+build_t *buildInit() {
+        build_t *build = (build_t *) mallocWrapper(sizeof(build_t));
         build->target = (char *) mallocWrapper(MAX_FILE_LEN * sizeof(char));
         build->dependents = (char **) mallocWrapper(MAX_OTHERS_LEN * sizeof(char *));
         build->cmds = (char **) mallocWrapper(MAX_CMD_LEN * sizeof(char *));
@@ -20,14 +18,51 @@ void buildInit(build_t *build) {
         build->dependents_len = 0;
 }
 
-/**
- *
- * @param build_list returns pointer to allocated build list
- */
-void buildListInit(build_list_t *build_list) {
-        build_list = (build_list_t *) mallocWrapper(sizeof(build_list_t));
+build_list_t *buildListInit() {
+        build_list_t *build_list = (build_list_t *) mallocWrapper(sizeof(build_list_t));
         build_list->list = mallocWrapper(MAX_OTHERS_LEN * sizeof(build_t *));
         build_list->len = 0;
+}
+
+void buildListFree(build_list_t *list) {
+        for (int i = 0; i < list->len; i++) {
+                buildFree(*list->list);
+                free(list->list[i]);
+        }
+        free(list->list);
+}
+
+void addDependent(build_t *build, char *dependent) {
+        if (build->dependents_len >= MAX_OTHERS_LEN) {
+                fprintf(stderr, "Error: Exceeded max size of dependents\n");
+                exit(EXIT_FAILURE);
+        }
+        build->dependents[build->dependents_len] = dependent;
+        // Increments dependents length
+        build->dependents_len++;
+}
+
+void addTarget(build_t *build, char *target) {
+        build->target = target;
+}
+
+void addBuild(build_list_t *list, build_t *build) {
+        if (list->len >= MAX_OTHERS_LEN) {
+                fprintf(stderr, "Error: Exceeded max size of build targets\n");
+                exit(EXIT_FAILURE);
+        }
+        list->list[list->len] = build;
+        list->len++;
+}
+
+void addCmd(build_t *build, char *cmd) {
+        if (build->cmds_len >= MAX_CMD_LEN) {
+                fprintf(stderr, "Error: Exceeded max size of commands\n");
+                exit(EXIT_FAILURE);
+        }
+        build->cmds[build->cmds_len] = cmd;
+        // Increments commands length
+        build->cmds_len++;
 }
 
 void buildFree(build_t *build) {
@@ -40,55 +75,4 @@ void buildFree(build_t *build) {
                 free(build->cmds[i]);
         }
         free(build->cmds);
-}
-
-void buildListFree(build_list_t *list) {
-        for (int i = 0; i < list->len; i++) {
-                buildFree(*list->list);
-                free(list->list[i]);
-        }
-        free(list->list);
-}
-
-/**
- *
- * @param build file that we want to add to
- * @param dependent dependent to add to list
- */
-void addDependent(build_t *build, char *dependent) {
-        if (build->dependents_len >= MAX_OTHERS_LEN) {
-                fprintf(stderr, "Error: Exceeded max size of dependents\n");
-                exit(EXIT_FAILURE);
-        }
-        build->dependents[build->dependents_len] = dependent;
-        // Increments dependents length
-        build->dependents_len++;
-}
-
-/**
- *
- * @param build
- * @param cmd adds commnad to build
- */
-void addCmd(build_t *build, char *cmd) {
-        if (build->cmds_len >= MAX_CMD_LEN) {
-                fprintf(stderr, "Error: Exceeded max size of commands\n");
-                exit(EXIT_FAILURE);
-        }
-        build->cmds[build->cmds_len] = cmd;
-        // Increments commands length
-        build->cmds_len++;
-}
-
-/**
- *
- * @param list
- * @param build adds build target to list
- */
-void addBuild(build_list_t *list, build_t *build) {
-        if (list->len >= MAX_OTHERS_LEN) {
-                fprintf(stderr, "Error: Exceeded max size of build targets\n");
-                exit(EXIT_FAILURE);
-        }
-        list->list[list->len] = build;
 }

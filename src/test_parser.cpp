@@ -1,9 +1,10 @@
 #include "catch.hpp"
+
 // include c headers
 extern "C" {
 	#include "parser.h"
-	#include "project_tools.h"
-	#include "build_structures.h"
+	#include "tools.h"
+	#include "build_spec.h"
 	#include <string.h>
 }
 
@@ -14,7 +15,8 @@ SCENARIO("Build lists can be populated", "[build_list]") {
 		char target[] = "main.o";
 		char cmd[] = "gcc -c main.c";
 		char dependents[] = "main.h";
-		build_t *build = buildInit();
+		build_t *build;
+		build = buildInit();
 		addBuild(list, build);
 		REQUIRE(list->list[0]->dependents_len == 0);
 		REQUIRE(list->list[0]->cmds_len == 0);

@@ -15,7 +15,7 @@ char * getCmd(FILE *fptr);
 
 build_t * readAll(char *filename) {
         build_t * return_file = NULL;
-        buildInit(return_file);
+        buildInit();
         FILE * file_pointer;
         file_pointer = fopen(filename, "r");
 

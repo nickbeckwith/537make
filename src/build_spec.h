@@ -14,19 +14,19 @@ typedef struct {
    int len;
 } build_list_t;
 
+
 /**
  *
  * @param build returns pointer to allocated build
  */
-void buildInit(build_t *build);
+build_t * buildInit();
 
 /**
  *
  * @param build_list returns pointer to allocated build list
  */
-void buildListInit(build_list_t *build_list);
+build_list_t * buildListInit();
 
-void buildFree(build_t *build);
 
 void buildListFree(build_list_t *list);
 
@@ -50,4 +50,12 @@ void addCmd(build_t *build, char *cmd);
  * @param build adds build target to list
  */
 void addBuild(build_list_t *list, build_t *build);
+
+/**
+ * Replaces current target of build with target specified in parameter
+ * @param build
+ * @param target
+ */
+void addTarget(build_t *build, char *target);
+
 #endif //P3_BUILD_SPEC_H
