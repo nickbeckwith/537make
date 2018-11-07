@@ -51,7 +51,7 @@ list_t * readAll(char *filename) {
  * @return NULL if reached EOF before target received
  */
 build_t * readBuild(FILE *file_pointer) {
-	build_t *build = buildInit();
+	build_t *build = initBuild();
 
 
     // get line of targets and dependents

@@ -39,7 +39,7 @@ void addEdge(vertex_t *from, vertex_t *to) {
 vertex_t *findVertex(graph_t *graph, build_t *build) {
 	vertex_t *vertex = initVertex(build);
 	node_t *node_ptr = graph->vertices->head;
-	while (node_ptr->next != NULL) {
+	while (node_ptr != NULL) {
 		// if targets of two builds are equal
 		if (isVertexEqual(vertex, node_ptr->data)) {
 			return node_ptr->data;
@@ -54,6 +54,7 @@ void clearVisited(graph_t *graph) {
 	if (node_ptr != NULL) {
 		do {
 			((vertex_t *) node_ptr->data)->visited = 0;
+			node_ptr = node_ptr->next;
 		} while (node_ptr->next != NULL);
 	}
 }
@@ -103,13 +104,16 @@ vertex_t * isCyclic(graph_t *graph) {
 		// skip all already visited vertices
 		do {
 			adj_node_ptr1 = adj_node_ptr1->next;
-		} while ((((vertex_t *)adj_node_ptr1->data)->visited == 1) & adj_node_ptr1 != NULL);
-		// while we pass visited nodes (we know the outcome) and while our ptr isn't null
+		} while (adj_node_ptr1 != NULL && (((vertex_t *)adj_node_ptr1->data)->visited == 1));
+		// while we pass visited nodes (we know the outcome) and while our ptr isn't null of course
 	}
 	return NULL;
 }
 
 int isVertexEqual(vertex_t *vertex1, vertex_t *vertex2) {
+	if (vertex1->build == NULL || vertex2->build== NULL) {
+		return 0;
+	}
 	return isBuildEqual(vertex1->build, vertex2->build);
 }
 

@@ -79,6 +79,7 @@ vertex_t * isCyclic(graph_t *graph);
 /**
  * returns 1 if the two vertices are equal 0 otherwise
  * The equality class is if the targets within the builds are equal
+ * Null characters are not equal
  * @param vertex1
  * @param vertex2
  * @return

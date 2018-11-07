@@ -4,7 +4,7 @@
 #include "tools.h"
 #include "build_spec.h"
 
-build_t *buildInit() {
+build_t *initBuild() {
     build_t *build = (build_t *) mallocWrapper(sizeof(build_t));
     build->target = (char *) mallocWrapper(MAX_BUF_LEN * sizeof(char));
     build->dependents = initList();
@@ -12,7 +12,7 @@ build_t *buildInit() {
     return build;
 }
 
-void buildFree(build_t *build) {
+void freeBuild(build_t *build) {
 	free(build->target);
 	freeList(build->dependents);
 	freeList(build->cmds);
@@ -32,6 +32,9 @@ void addCmd(build_t *build, char *cmd) {
 }
 
 int isBuildEqual(build_t *build1, build_t *build2) {
+	if (build1->target == NULL || build2->target == NULL) {
+		return 0;
+	}
 	return strcmp(build1->target, build2->target) == 0;
 }
 

@@ -16,7 +16,7 @@ SCENARIO("Build lists can be populated", "[build_list]") {
 		char cmd[] = "gcc -c main.c";
 		char dependents[] = "main.h";
 		build_t *build;
-		build = buildInit();
+		build = initBuild();
 		addElem(list, build);
 		build_t *build1 = (build_t *) list->head->data;
 		REQUIRE(build1->dependents->len == 0);
@@ -29,7 +29,7 @@ SCENARIO("Build lists can be populated", "[build_list]") {
 		REQUIRE(build1->dependents->len == 1);
 		REQUIRE(0 == strcmp(build1->target, target));
 		char cmd1[] = "gcc main.o";
-		build_t *build2 = buildInit();
+		build_t *build2 = initBuild();
 		addElem(list, build2);
 		build2 = (build_t *) list->tail->data;
 		addCmd(build2, cmd1);

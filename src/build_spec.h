@@ -18,7 +18,7 @@ typedef struct {
  *
  * @param build returns pointer to allocated build
  */
-build_t * buildInit();
+build_t * initBuild();
 
 /**
  *
@@ -28,7 +28,7 @@ build_t * buildInit();
  */
 int isBuildEqual(build_t *build1, build_t *build2);
 
-void buildFree(build_t *build);
+void freeBuild(build_t *build);
 
 /**
  *
