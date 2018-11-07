@@ -10,30 +10,31 @@ extern "C" {
 
 SCENARIO("Build lists can be populated", "[build_list]") {
 	GIVEN("An empty build_list") {
-		build_list_t *list = buildListInit();
+		list_t *list = initList();
 		REQUIRE(list->len == 0);
 		char target[] = "main.o";
 		char cmd[] = "gcc -c main.c";
 		char dependents[] = "main.h";
 		build_t *build;
 		build = buildInit();
-		addBuild(list, build);
-		REQUIRE(list->list[0]->dependents_len == 0);
-		REQUIRE(list->list[0]->cmds_len == 0);
+		addElem(list, build);
+		build_t *build1 = (build_t *) list->head->data;
+		REQUIRE(build1->dependents->len == 0);
+		REQUIRE(build1->cmds->len == 0);
 		REQUIRE(list->len == 1);
-		addTarget(list->list[0], target);
-		addCmd(list->list[0], cmd);
-		addDependent(list->list[0], dependents);
-		REQUIRE(list->list[0]->cmds_len == 1);
-		REQUIRE(list->list[0]->dependents_len == 1);
-		REQUIRE(0 == strcmp(list->list[0]->target, target));
+		addTarget(build1, target);
+		addCmd(build1, cmd);
+		addDependent(build1, dependents);
+		REQUIRE(build1->cmds->len == 1);
+		REQUIRE(build1->dependents->len == 1);
+		REQUIRE(0 == strcmp(build1->target, target));
 		char cmd1[] = "gcc main.o";
-		build_t *build1 = nullptr;
-		build1 = buildInit();
-		addCmd(build1, cmd1);
-		addBuild(list, build1);
+		build_t *build2 = buildInit();
+		addElem(list, build2);
+		build2 = (build_t *) list->tail->data;
+		addCmd(build2, cmd1);
 		REQUIRE(list->len == 2);
-		REQUIRE(list->list[1]->cmds_len == 1);
+		REQUIRE(build2->cmds->len == 1);
 	}
 }
 

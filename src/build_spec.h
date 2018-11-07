@@ -1,23 +1,18 @@
 #ifndef P3_BUILD_SPEC_H
 #define P3_BUILD_SPEC_H
 
-#define MAX_FILE_LEN 255
+#include "list.h"
+
 #define MAX_CMD_LEN  1024     // might change to SC_ARG_MAX
 #define MAX_BUF_LEN 1024
 
 typedef struct {
-   char * target;       // the target name
-   char ** dependents;  // list of dependents
-   char ** cmds;        // list of commands
-   int dependents_len; // size of dependent list
-   int cmds_len;       // size of cmds
+   char * target;               // the target name
+   list_t *dependents;          // list of dependents
+   list_t *cmds;                // list of commands // can have absurd amount of commands
+   int out_of_date;             // 1 if target was out of date
+   int isPhony;                 // 1 if target is phony (no file exists)
 } build_t;
-
-typedef struct {
-   build_t ** list;
-   int len;
-} build_list_t;
-
 
 /**
  *
@@ -27,19 +22,13 @@ build_t * buildInit();
 
 /**
  *
- * @param build_list returns pointer to allocated build list
- */
-build_list_t * buildListInit();
-
-/**
- *
  * @param build1
  * @param build2
  * @return 1 if build1 and build2 targets are equal
  */
 int isBuildEqual(build_t *build1, build_t *build2);
 
-void buildListFree(build_list_t *list);
+void buildFree(build_t *build);
 
 /**
  *
@@ -51,16 +40,9 @@ void addDependent(build_t *build, char *dependent);
 /**
  *
  * @param build
- * @param cmd adds commnad to build
+ * @param cmd adds command to build
  */
 void addCmd(build_t *build, char *cmd);
-
-/**
- *
- * @param list
- * @param build adds build target to list
- */
-void addBuild(build_list_t *list, build_t *build);
 
 /**
  * Replaces current target of build with target specified in parameter

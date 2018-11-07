@@ -8,15 +8,6 @@ extern "C" {
 	#include "parser.h"
 	#include <string.h>
 }
-
-TEST_CASE("Empty file returns null") {
-	char filename[] = ".__tmp001";
-	ofstream file;
-	file.open(filename);
-	file.close();
-	REQUIRE(readAll(filename) == nullptr);
-	remove(filename);
-}
  
 TEST_CASE("Test parser basic case") {
 	char filename[] = ".__tmp001";
@@ -25,14 +16,15 @@ TEST_CASE("Test parser basic case") {
 	file << "\ndefault: dep1 dep2\n\tgcc -o\t dep1 dep2\n\techo hello\n\n";
 	file << "dep1:\n\tgcc -c dep1.c";
 	file.close();
-	build_list_t *list = readAll(filename);
-	REQUIRE(strcmp(list->list[0]->target, "default") == 0);	
-	REQUIRE(strcmp(list->list[0]->dependents[1], "dep2") == 0);
-	REQUIRE(strcmp(list->list[0]->cmds[1], "echo hello") == 0);	
-	REQUIRE(strcmp(list->list[1]->target, "dep1") == 0);
-	REQUIRE(strcmp(list->list[1]->cmds[0], "gcc -c dep1.c") == 0);	
-	REQUIRE(*(list->list[1]->dependents) == nullptr);
-	REQUIRE(list->list[1]->dependents_len == 0);	
+	list_t *list = readAll(filename);
+	auto *build1 = (build_t *) list->head->data;
+	auto *build2 = (build_t *) list->tail->data;
+	REQUIRE(strcmp(build1->target, "default") == 0);
+	REQUIRE(strcmp((char *)build1->dependents->tail->data, "dep2") == 0);
+	REQUIRE(strcmp((char *)build1->cmds->tail->data, "echo hello") == 0);
+	REQUIRE(strcmp(build2->target, "dep1") == 0);
+	REQUIRE(build2->dependents->head == nullptr);
+	REQUIRE(build2->dependents->len == 0);
 	remove(filename);
 }
 
@@ -43,14 +35,15 @@ TEST_CASE("Test parser screwy case") {
 	file << "\n\n\ndefault: dep1 dep2\n\tgcc -o\t dep1 dep2\n\techo hello\n";
 	file << "dep1:";
 	file.close();
-	build_list_t *list = readAll(filename);
-	REQUIRE(strcmp(list->list[0]->target, "default") == 0);
-	REQUIRE(strcmp(list->list[0]->dependents[1], "dep2") == 0);
-	REQUIRE(strcmp(list->list[0]->cmds[1], "echo hello") == 0);
-	REQUIRE(strcmp(list->list[1]->target, "dep1") == 0);
-	REQUIRE(list->list[1]->cmds[0] == nullptr);
-	REQUIRE(*(list->list[1]->dependents) == nullptr);
-	REQUIRE(list->list[1]->dependents_len == 0);
+	list_t *list = readAll(filename);
+	auto build1 = (build_t *) list->head->data;
+	auto *build2 = (build_t *) list->tail->data;
+	REQUIRE(strcmp(build1->target, "default") == 0);
+	REQUIRE(strcmp((char *)build1->dependents->tail->data, "dep2") == 0);
+	REQUIRE(strcmp((char *)build1->cmds->tail->data, "echo hello") == 0);
+	REQUIRE(strcmp(build2->target, "dep1") == 0);
+	REQUIRE(build2->dependents->head == nullptr);
+	REQUIRE(build2->dependents->len == 0);
 	remove(filename);
 }
 
@@ -61,13 +54,15 @@ TEST_CASE("Case with multiple white space inbetween target and : as well as whit
 	file << "\ndefault \t :dep1 dep2\n\tgcc -o\t dep1 dep2\n\techo hello\n\n";
 	file << "dep1: \n\tgcc -c dep1.c";
 	file.close();
-	build_list_t *list = readAll(filename);
-	REQUIRE(strcmp(list->list[0]->target, "default") == 0);
-	REQUIRE(strcmp(list->list[0]->dependents[1], "dep2") == 0);
-	REQUIRE(strcmp(list->list[0]->cmds[1], "echo hello") == 0);
-	REQUIRE(strcmp(list->list[1]->target, "dep1") == 0);
-	REQUIRE(strcmp(list->list[1]->cmds[0], "gcc -c dep1.c") == 0);
-	REQUIRE(*(list->list[1]->dependents) == nullptr);
-	REQUIRE(list->list[1]->dependents_len == 0);
+	list_t *list = readAll(filename);
+	auto build1 = (build_t *) list->head->data;
+	auto *build2 = (build_t *) list->tail->data;
+	REQUIRE(strcmp(build1->target, "default") == 0);
+	REQUIRE(strcmp((char *)build1->dependents->tail->data, "dep2") == 0);
+	REQUIRE(strcmp((char *)build1->cmds->tail->data, "echo hello") == 0);
+	REQUIRE(strcmp(build2->target, "dep1") == 0);
+	REQUIRE(strcmp((char *)build2->cmds->head->data, "gcc -c dep1.c") == 0);
+	REQUIRE(build2->dependents->head == nullptr);
+	REQUIRE(build2->dependents->len == 0);
 	remove(filename);
 }

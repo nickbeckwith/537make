@@ -20,11 +20,11 @@ int line_number;
 int * getTargetIndex(const char *targetLine);
 char * getCmd(char *cptr);
 char * fgetsWrapper(char *str, int n, FILE *stream);
-void printParserErrorAndExit(char *err);
+void printParserErrorAndExit(const char *line);
 build_t * readBuild(FILE *file_pointer);
 
 
-build_list_t * readAll(char *filename) {
+list_t * readAll(char *filename) {
 	// open file and handle errors
 	FILE *fptr = fopen(filename, "r");
 	if (fptr == NULL) {
@@ -33,13 +33,14 @@ build_list_t * readAll(char *filename) {
 	}
 
 	// create build list and populate it
-	build_list_t *list = buildListInit();
+	list_t *list = initList();
 	build_t *build;
 	while ((build = readBuild(fptr)) != NULL) {
-		addBuild(list, build);
+		addElem(list, build);
 	}
 	if (list->len == 0) {
-		return NULL;
+		fprintf(stderr, "make: *** No Targets.\tStop");
+		exit(EXIT_FAILURE);
 	}
 	return list;
 }
@@ -99,7 +100,7 @@ build_t * readBuild(FILE *file_pointer) {
 		}
 		// check for tab
 		if (line_ptr[0] != '\t') {
-			printParserErrorAndExit("No tab found when expecting command");
+			printParserErrorAndExit(line_ptr);
 		}
 		// replace new line at end of command
 		for (int i = 0; line_ptr[i] != '\0'; i++) {
@@ -113,7 +114,7 @@ build_t * readBuild(FILE *file_pointer) {
 
 /**
  * Modifies
- * @param targetLine is modified to remove "target:"
+ * @param assumes we're the line we're on contains the target
  * @return the first index is after target and the second index is at the colon
  */
 int * getTargetIndex(const char *targetLine) {
@@ -130,17 +131,17 @@ int * getTargetIndex(const char *targetLine) {
 			// must be able to handle "all   : main.o" (multiple spaces"
 			for (int j = i; targetLine[j] != '\0'; j++) {
 				if (isalpha(targetLine[j]) | isdigit(targetLine[j])) {
-					printParserErrorAndExit("Target not found");
+					printParserErrorAndExit(targetLine);
 				} else if (targetLine[j] == ':') {
 					ret_arr[0] = i;
 					ret_arr[1] = j;
 					return ret_arr;
 				}
 			}
-			printParserErrorAndExit("Target not found");
+			printParserErrorAndExit(targetLine);
 		}
 	}
-	printParserErrorAndExit("Target not found");
+	printParserErrorAndExit(targetLine);
 	return NULL;      // unreachable but clang doesn't realize it
 }
 
@@ -148,6 +149,7 @@ int * getTargetIndex(const char *targetLine) {
  * Fgets wrapper increments line counter
  * returns null if EOF
  * Increments until there's a non null line
+ * Only place where we deal with lines possibly > 1024
  **/
 char * fgetsWrapper(char *str, int n, FILE *stream) {
 	char *status;
@@ -159,8 +161,13 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 		}
 		// if line doesn't have a new line and isn't EOF then
 		if (!strchr(str, '\n') & !feof(stream)) {
-			char *status_tmp;
-			printParserErrorAndExit("line too large");
+			// make sure to print out entire line
+			while (!strchr(str, '\n')) {
+				fprintf(stderr, "%d: Invalid line: %s", line_number, str);
+				fgets(str, n, stream);
+			}
+			fprintf(stderr, "%d: Invalid line: %s", line_number, str);
+			exit(EXIT_FAILURE);
 		}
 	} while (str[0] == '\n' & !feof(stream));
 	if (status == NULL) {
@@ -177,11 +184,11 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 
 /**
  * Prints error message with line number and exits with failure
- * @param err error to be printed
- * @param line_number
+ * Only should be used after getting line with fgetsWrapper
+ * @param line error to be printed
  */
-void printParserErrorAndExit(char *err) {
-	fprintf(stderr, "%d: Invalid line: %s\n", line_number, err);
+void printParserErrorAndExit(const char *line) {
+	fprintf(stderr, "%d: Invalid line: %s", line_number, line);
 	exit(EXIT_FAILURE);
 }
 
