@@ -17,10 +17,10 @@
 int line_number;
 
 // Privately defined
-int getTargetIndex(const char *targetLine);
+int * getTargetIndex(const char *targetLine);
 char * getCmd(char *cptr);
 char * fgetsWrapper(char *str, int n, FILE *stream);
-void printParserError(char *err);
+void printParserErrorAndExit(char *err);
 build_t * readBuild(FILE *file_pointer);
 
 
@@ -61,13 +61,13 @@ build_t * readBuild(FILE *file_pointer) {
     }
 
 	// Get target index and split the strings at that index to get target and dependents
-	int targetIndex = getTargetIndex(line_ptr);
+	int *index_arr = getTargetIndex(line_ptr);
     char *target = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
     strcpy(target, line_ptr);
-    target[targetIndex] = '\0';
+    target[index_arr[0]] = '\0';
 	addTarget(build, target);
 	// increment line_ptr to get dependents
-	line_ptr = line_ptr + targetIndex + 1;
+	line_ptr = line_ptr + index_arr[1] + 1;
 
 	// Get dependents tokenized
 	char **tokens = (char **) mallocWrapper(MAX_BUF_LEN * sizeof(char *));
@@ -99,7 +99,7 @@ build_t * readBuild(FILE *file_pointer) {
 		}
 		// check for tab
 		if (line_ptr[0] != '\t') {
-			printParserError("No tab found when expecting command");
+			printParserErrorAndExit("No tab found when expecting command");
 		}
 		// replace new line at end of command
 		for (int i = 0; line_ptr[i] != '\0'; i++) {
@@ -114,21 +114,34 @@ build_t * readBuild(FILE *file_pointer) {
 /**
  * Modifies
  * @param targetLine is modified to remove "target:"
- * @return index where ':' is located
+ * @return the first index is after target and the second index is at the colon
  */
-int getTargetIndex(const char *targetLine) {
+int * getTargetIndex(const char *targetLine) {
 	// first ensure first char is a readable char
+	int *ret_arr = (int *) mallocWrapper(2 * sizeof(int));
 	for (int i = 0; targetLine[i] != '\0'; i++) {
 		if (isalpha(targetLine[i]) | isdigit(targetLine[i])) {
 			// it's okay
 		} else if (targetLine[i] == ':') {
-			return i;
+			ret_arr[0] = i;
+			ret_arr[1] = i;
+			return ret_arr;
 		} else {
-			printParserError("Target not found");
+			// must be able to handle "all   : main.o" (multiple spaces"
+			for (int j = i; targetLine[j] != '\0'; j++) {
+				if (isalpha(targetLine[j]) | isdigit(targetLine[j])) {
+					printParserErrorAndExit("Target not found");
+				} else if (targetLine[j] == ':') {
+					ret_arr[0] = i;
+					ret_arr[1] = j;
+					return ret_arr;
+				}
+			}
+			printParserErrorAndExit("Target not found");
 		}
 	}
-	printParserError("Target not found");
-	return -1;      // unreachable but clang doesn't realize it
+	printParserErrorAndExit("Target not found");
+	return NULL;      // unreachable but clang doesn't realize it
 }
 
 /**
@@ -147,7 +160,7 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 		// if line doesn't have a new line and isn't EOF then
 		if (!strchr(str, '\n') & !feof(stream)) {
 			char *status_tmp;
-			printParserError("line too large");
+			printParserErrorAndExit("line too large");
 		}
 	} while (str[0] == '\n' & !feof(stream));
 	if (status == NULL) {
@@ -167,7 +180,7 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
  * @param err error to be printed
  * @param line_number
  */
-void printParserError(char *err) {
+void printParserErrorAndExit(char *err) {
 	fprintf(stderr, "%d: Invalid line: %s\n", line_number, err);
 	exit(EXIT_FAILURE);
 }
