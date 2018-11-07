@@ -31,6 +31,13 @@ build_t * buildInit();
  */
 build_list_t * buildListInit();
 
+/**
+ *
+ * @param build1
+ * @param build2
+ * @return 1 if build1 and build2 targets are equal
+ */
+int isBuildEqual(build_t *build1, build_t *build2);
 
 void buildListFree(build_list_t *list);
 

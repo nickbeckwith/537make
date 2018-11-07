@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "tools.h"
 #include "build_spec.h"
 
@@ -59,6 +60,10 @@ void addCmd(build_t *build, char *cmd) {
         build->cmds[build->cmds_len] = cmd;
         // Increments commands length
         build->cmds_len++;
+}
+
+int isBuildEqual(build_t *build1, build_t *build2) {
+	return strcmp(build1->target, build2->target) == 0
 }
 
 void buildFree(build_t *build) {
