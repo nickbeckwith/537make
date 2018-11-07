@@ -50,5 +50,4 @@ void addCmd(build_t *build, char *cmd);
  * @param target
  */
 void addTarget(build_t *build, char *target);
-
 #endif //P3_BUILD_SPEC_H

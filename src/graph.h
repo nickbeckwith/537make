@@ -12,24 +12,23 @@ typedef struct vertex_t {
 } vertex_t;
 
 typedef struct graph_t {
-	vertex_t *vertices;
+	list_t *vertices;
 	int num_vertices;
 }graph_t;
 
 
 /**
  *
- * @param max_vertices max number of vertices allowed
- * @return an empty initialized graph with set number of vertices allowed
- * and num vertices set to zero, and adjacency list of vertices dynamically allocated
+ * @return an empty initialized graph
+ * with num vertices set to zero
  */
-graph_t *initGraph(int max_vertices);
+graph_t *initGraph();
 
 /**
  * frees what was allocated in graph
  * @param graph
  */
-void freeGraph(graph_t graph);
+void freeGraph(graph_t *graph);
 
 /**
  * Allocates a vertex with build. Sets visited to zero
@@ -41,23 +40,50 @@ vertex_t * initVertex(build_t *build);
  * frees what was dynamically allocated in initVertex
  * @param node
  */
-void freeVertex(vertex_t *node);
+void freeVertex(vertex_t *vertex);
 
 /**
  * Adds vertex to graph_t.vertices
+ * Assumes there are no duplicate targets
+ * @param graph graph that vertex is being added to
  * @param vertex vertex being added to graph
- * @return -1 vertex already existed. Does not write
  */
-int addVertex(vertex_t *vertex, vertex_t *child);
-
-
+void addVertex(graph_t *graph, vertex_t *vertex);
 
 /**
- * Checks if graph is cyclic. Assumes all visited is zero. Returns all visited to zero after.
+ * Creates an edge from "from" and to "to"
+ * @param from
+ * @param to
+ */
+void addEdge(vertex_t *from, vertex_t *to);
+
+/**
+ * @param build whose target is going to be compared
+ * @returns vertex that matches build. NULL if no match
+ */
+vertex_t *findVertex(graph_t *graph, build_t *build);
+
+/**
+ * resets all vertices of graph to not visited
+ * @param graph
+ */
+void clearVisited(graph_t *graph);
+
+/**
+ * Checks if graph is cyclic. Clears visited
  * @param graph
  * @return the first twice visited node. If not cyclic then return NULL
  */
-vertex_t * isCyclic(graph_t graph);
+vertex_t * isCyclic(graph_t *graph);
+
+/**
+ * returns 1 if the two vertices are equal 0 otherwise
+ * The equality class is if the targets within the builds are equal
+ * @param vertex1
+ * @param vertex2
+ * @return
+ */
+int isVertexEqual(vertex_t *vertex1, vertex_t *vertex2);
 
 
 #endif //P3_GRAPH_H
