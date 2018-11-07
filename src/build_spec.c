@@ -9,6 +9,8 @@ build_t *initBuild() {
     build->target = (char *) mallocWrapper(MAX_BUF_LEN * sizeof(char));
     build->dependents = initList();
     build->cmds = initList();
+    build->isPhony = -1;
+    build->out_of_date = -1;
     return build;
 }
 
@@ -36,5 +38,16 @@ int isBuildEqual(build_t *build1, build_t *build2) {
 		return 0;
 	}
 	return strcmp(build1->target, build2->target) == 0;
+}
+
+int isBuildEqualByTarget(build_t *build, const char *target) {
+	if (build->target == NULL || target == NULL) {
+		return 0;
+	}
+	return strcmp(build->target, target) == 0;
+}
+
+int isPhony(build_t *build) {
+	return build->isPhony;
 }
 

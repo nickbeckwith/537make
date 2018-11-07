@@ -10,8 +10,8 @@ typedef struct {
    char * target;               // the target name
    list_t *dependents;          // list of dependents
    list_t *cmds;                // list of commands // can have absurd amount of commands
-   int out_of_date;             // 1 if target was out of date
-   int isPhony;                 // 1 if target is phony (no file exists)
+   int out_of_date;             // 1 if target was out of date, 0 if not, -1 if not set
+   int isPhony;                 // 1 if target is phony (no file exists), 0 if not, -1 if not set
 } build_t;
 
 /**
@@ -27,6 +27,8 @@ build_t * initBuild();
  * @return 1 if build1 and build2 targets are equal
  */
 int isBuildEqual(build_t *build1, build_t *build2);
+
+int isBuildEqualByTarget(build_t *build, const char *target);
 
 void freeBuild(build_t *build);
 
@@ -50,4 +52,11 @@ void addCmd(build_t *build, char *cmd);
  * @param target
  */
 void addTarget(build_t *build, char *target);
+
+/**
+ *
+ * @param build
+ * @return 1 if build is phony
+ */
+int isPhony(build_t *build);
 #endif //P3_BUILD_SPEC_H

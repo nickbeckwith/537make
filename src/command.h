@@ -11,3 +11,8 @@ char ** tokenizeCommand(char *cmd);
  */
 void runCommand(const char * cmd);
 #endif //P3_COMMAND_H
+
+/**
+ * runs all commands specified in build
+ */
+void runAllCommands(build_t *build);

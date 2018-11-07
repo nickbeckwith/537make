@@ -40,3 +40,11 @@ void runCommand(const char *cmd) {
 		}
 	}
 }
+
+void runAllCommands(build_t *build) {
+	node_t *ptr = build->cmds->head;
+	while (ptr != NULL) {
+		runCommand(ptr->data);
+		ptr = ptr->next;
+	}
+}

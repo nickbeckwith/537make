@@ -49,6 +49,18 @@ vertex_t *findVertex(graph_t *graph, build_t *build) {
 	return NULL;
 }
 
+vertex_t *findVertexByTarget(graph_t *graph, const char * target) {
+	node_t *node_ptr = graph->vertices->head;
+	while (node_ptr != NULL) {
+		// if targets of two builds are equal
+		if (isVertexEqualByTarget(node_ptr->data, target)) {
+			return node_ptr->data;
+		} // else
+		node_ptr = node_ptr->next;
+	}
+	return NULL;
+}
+
 void clearVisited(graph_t *graph) {
 	node_t *node_ptr = graph->vertices->head;
 	if (node_ptr != NULL) {
@@ -111,10 +123,17 @@ vertex_t * isCyclic(graph_t *graph) {
 }
 
 int isVertexEqual(vertex_t *vertex1, vertex_t *vertex2) {
-	if (vertex1->build == NULL || vertex2->build== NULL) {
+	if (vertex1->build == NULL || vertex2->build == NULL) {
 		return 0;
 	}
 	return isBuildEqual(vertex1->build, vertex2->build);
+}
+
+int isVertexEqualByTarget(vertex_t *vertex, const char *target) {
+	if (vertex->build == NULL || target == NULL) {
+		return 0;
+	}
+	return isBuildEqualByTarget(vertex->build, target);
 }
 
 

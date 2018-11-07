@@ -64,6 +64,12 @@ void addEdge(vertex_t *from, vertex_t *to);
 vertex_t *findVertex(graph_t *graph, build_t *build);
 
 /**
+ * @param target whose target is going to be compared
+ * @returns vertex that matches target. NULL if no match
+ */
+vertex_t *findVertexByTarget(graph_t *graph, const char * target);
+
+/**
  * resets all vertices of graph to not visited
  * @param graph
  */
@@ -85,6 +91,16 @@ vertex_t * isCyclic(graph_t *graph);
  * @return
  */
 int isVertexEqual(vertex_t *vertex1, vertex_t *vertex2);
+
+/**
+ * returns 1 if the two vertices are equal 0 otherwise
+ * The equality class is if the targets within the builds are equal
+ * Null characters are not equal
+ * @param vertex
+ * @param target
+ * @return
+ */
+int isVertexEqualByTarget(vertex_t *vertex, const char *target);
 
 
 #endif //P3_GRAPH_H
