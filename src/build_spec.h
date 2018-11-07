@@ -7,11 +7,11 @@
 #define MAX_BUF_LEN 1024
 
 typedef struct {
-   char * target;               // the target name
-   list_t *dependents;          // list of dependents
-   list_t *cmds;                // list of commands // can have absurd amount of commands
-   int out_of_date;             // 1 if target was out of date, 0 if not, -1 if not set
-   int isPhony;                 // 1 if target is phony (no file exists), 0 if not, -1 if not set
+	char * target;         // the target name
+	list_t *dependents;          // list of dependents
+	list_t *cmds;                // list of commands // can have absurd amount of commands
+	int out_of_date;             // 1 if target was out of date, 0 if not, -1 if not set
+	int isPhony;                 // 1 if target is phony (no file exists), 0 if not, -1 if not set
 } build_t;
 
 /**
@@ -51,7 +51,7 @@ void addCmd(build_t *build, char *cmd);
  * @param build
  * @param target
  */
-void addTarget(build_t *build, char *target);
+void addTarget(build_t *build, const char *target);
 
 /**
  *
