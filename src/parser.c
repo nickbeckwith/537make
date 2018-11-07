@@ -24,7 +24,7 @@ void printParserErrorAndExit(const char *line);
 build_t * readBuild(FILE *file_pointer);
 
 
-list_t * readAll(char *filename) {
+list_t * readAll(const char *filename) {
 	// open file and handle errors
 	FILE *fptr = fopen(filename, "r");
 	if (fptr == NULL) {
