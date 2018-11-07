@@ -3,5 +3,6 @@
 
 #include "build_spec.h"
 
-build_t * readAll(char *filename);
+build_list_t * readAll(char *filename);
+
 #endif //P3_PARSER_H

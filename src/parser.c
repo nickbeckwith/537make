@@ -1,123 +1,134 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "parser.h"
 #include "build_spec.h"
 #include "tools.h"
 // Privately defined
-#define MAX_FILE_LEN 255
-#define MAX_CMD_LEN  1024     // [might change to SC_ARG_MAX]
-#define MAX_OTHERS_LEN 1024
+
+
+// this converts to string
+#define STR_(X) #X
+
+// this makes sure the argument is expanded before converting to string
+#define STR(X) STR_(X)
 
 // Global variables
-int line_number = 0;
+int line_number;
 
 // Privately defined
-char * getTarget(FILE *fptr);
-char * getDep(char *cptr);
+int getTargetIndex(const char *targetLine);
 char * getCmd(char *cptr);
-void checkforTab(char *cptr);
-
-build_t * readBuild(FILE *file_pointer) {
-		build_t *return_file = buildInit();
-        if (file_pointer == NULL) {
-                printf("Error: Makefile could not be opened\n");
-                exit(1);
-        }
-
-        // Target: Reads first word, checks if valid target, stores valid target
-        char * temp_target_ptr;
-        temp_target_ptr = getTarget(file_pointer);
-        return_file->target = getTarget(file_pointer);;      
+char * fgetsWrapper(char *str, int n, FILE *stream);
+void printParserError(char *err);
+build_t * readBuild(FILE *file_pointer);
 
 
-        // Dependents: Creates line pointer, set pointers in return file to each word
-        char * line_ptr;
-        line_ptr = (char *) mallocWrapper(sizeof(char) * MAX_FILE_LEN);
-        fgets(line_ptr, MAX_FILE_LEN, file_pointer);
-		line_number++;
-        char * temp_dependent_ptr;
-		// 
-        while (*line_ptr != '\0') {
-                temp_dependent_ptr = getDep(line_ptr);
-                addDependent(getDep(file_pointer));
-                while (*(temp_dependent_ptr) != '\0') {
-                        temp_dependent_ptr++;
-                        line_ptr++;
-                }
-                line_ptr++;
-         }
-        
-         // Cmds: Set line pointer to new line, check for tab, set pointers in return file to each word
-        fgets(line_ptr, MAX_FILE_LEN, file_pointer);
-		line_number++;
-        checkforTab(line_ptr);
-		// line_
-        while (*line_ptr != '\0') {
-                temp_dependent_ptr = getCmd(line_ptr);
-                addCmd(getCmd(file_pointer));
-                while (*(temp_dependent_ptr) != '\0') {
-                        temp_dependent_ptr++;
-                        line_ptr++;
-                }
-                line_ptr++;
-         }
+build_list_t * readAll(char *filename) {
+	// open file and handle errors
+	FILE *fptr = fopen(filename, "r");
+	if (fptr == NULL) {
+		fprintf(stderr, "Error: Makefile could not be opened\n");
+		exit(EXIT_FAILURE);
+	}
 
-        fclose(file_pointer);
-        return return_file;
+	// create build list and populate it
+	build_list_t *list = buildListInit();
+	build_t *build;
+	while ((build = readBuild(fptr)) != NULL) {
+		addBuild(list, build);
+	}
+	if (list->len == 0) {
+		return NULL;
+	}
+	return list;
 }
-
-target1: dep1 dep2
-	cmd1 cmd2
-
-dep1: dep3 dep4
-
 
 /**
- * Assumes this is called while fptr is on first column
- * Advances fptr to target and consumes "target:"
- * and returns "target:"
+ * Reads a single build
+ * @param file_pointer
+ * @return NULL if reached EOF before target received
  */
-char * getTarget(FILE *fptr) {
-        char *target = (char *) mallocWrapper(MAX_FILE_LEN * sizeof(char));
-		// TODO read line with fgets
-		// TODO consume lines until fscanf returns 1
-		// TODO if we don't reach ret_val of 1 then check EOF
-        fscanf(fptr, "%s", target);
+build_t * readBuild(FILE *file_pointer) {
+	build_t *build = buildInit();
 
-        char * valid_target_checker = target;
-        while(*(valid_target_checker + 1) != NULL) {
-                valid_target_checker = valid_target_checker + 1;
-        }
 
-        if(*valid_target_checker != ':') {
-                printf("makefile:1: *** missing separator.  Stop.\n");
-                exit(1);
-        }
+    // get line of targets and dependents
+	char * line_ptr;
+	line_ptr = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
+    if (fgetsWrapper(line_ptr, MAX_BUF_LEN, file_pointer) == NULL) {
+        return NULL;        // if EOF
+    }
 
-        return target;
+	// Get target index and split the strings at that index to get target and dependents
+	int targetIndex = getTargetIndex(line_ptr);
+    char *target = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
+    strcpy(target, line_ptr);
+    target[targetIndex] = '\0';
+	addTarget(build, target);
+	// increment line_ptr to get dependents
+	line_ptr = line_ptr + targetIndex + 1;
+
+	// Get dependents tokenized
+	char **tokens = (char **) mallocWrapper(MAX_BUF_LEN * sizeof(char *));
+	int tokens_count = 0;
+	tokens[tokens_count] = strtok(line_ptr, " \n");     // initialize and pass the first token
+	while (tokens[tokens_count] != NULL) {
+		tokens_count++;
+		tokens[tokens_count] = strtok(NULL, " \n");
+	}
+
+	// add all dependents 1 by 1
+	for (int i = 0; i < tokens_count; i++) {
+		addDependent(build, tokens[i]);
+	}
+
+	long file_ptr_locaiton;
+	// Cmds: Set line pointer to new line, check for tab, set pointers in return file to each word
+	while (1) {
+		line_ptr = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
+		file_ptr_locaiton = ftell(file_pointer);
+		if (fgetsWrapper(line_ptr, MAX_BUF_LEN, file_pointer) == NULL) {
+			return build;        // if EOF
+		}
+		// if alpha/digit character, build is done. Make sure to reset
+		// file pointer to where it was before consuming target line
+		if (isalpha(line_ptr[0]) | isdigit(line_ptr[0])) {
+			fseek(file_pointer, file_ptr_locaiton, SEEK_SET);       // return to place before target
+			return build;
+		}
+		// check for tab
+		if (line_ptr[0] != '\t') {
+			printParserError("No tab found when expecting command");
+		}
+		// replace new line at end of command
+		for (int i = 0; line_ptr[i] != '\0'; i++) {
+			if (line_ptr[i] == '\n') {
+				line_ptr[i] = '\0';
+			}
+		}
+		addCmd(build, &line_ptr[1]);
+	}
 }
 
-char * getDep(char *cptr) {
-        char *cmd = (char *) mallocWrapper(MAX_OTHERS_LEN * sizeof(char));
-        sscanf(cptr, "%s", cmd);
-        return cmd;
-}
-
-char * getCmd(char *cptr) {
-        char *cmd = (char *) mallocWrapper(MAX_CMD_LEN * sizeof(char));
-        sscanf(cptr, "%s", cmd);
-        return cmd;
-}
-
-void checkforTab(char *cptr) {
-        int space_counter = 0;
-        if (*cptr != '\t') {
-                while(*(cptr + space_counter) == ' ') {
-                        space_counter++;
-                }
-                printf("makefile:2: *** missing separator (did you mean TAB instead of %d spaces?).  Stop.\n", space_counter);
-                exit(1);
-        }
+/**
+ * Modifies
+ * @param targetLine is modified to remove "target:"
+ * @return index where ':' is located
+ */
+int getTargetIndex(const char *targetLine) {
+	// first ensure first char is a readable char
+	for (int i = 0; targetLine[i] != '\0'; i++) {
+		if (isalpha(targetLine[i]) | isdigit(targetLine[i])) {
+			// it's okay
+		} else if (targetLine[i] == ':') {
+			return i;
+		} else {
+			printParserError("Target not found");
+		}
+	}
+	printParserError("Target not found");
+	return -1;      // unreachable but clang doesn't realize it
 }
 
 /**
@@ -126,14 +137,21 @@ void checkforTab(char *cptr) {
  * Increments until there's a non null line
  **/
 char * fgetsWrapper(char *str, int n, FILE *stream) {
-	char *line = (char *) mallocWrapper(n * sizeof(char));
+	char *status;
 	do {
-		line = fgets(str, n, stream);
+		status = fgets(str, n, stream);
 		line_number++;
-	} while (line != NULL | line[0] == '\n');
-
-	// if line was null then do error checking or find eof
-	if (line == NULL) {
+		if (status == NULL) {
+			break;          // if error or EOF get out of loop
+		}
+		// if line doesn't have a new line and isn't EOF then
+		if (!strchr(str, '\n') & !feof(stream)) {
+			char *status_tmp;
+			printParserError("line too large");
+		}
+	} while (str[0] == '\n' & !feof(stream));
+	if (status == NULL) {
+		line_number--;          // don't count last line
 		if (feof(stream)) {
 			return NULL;
 		} else {
@@ -141,7 +159,16 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 			exit(EXIT_FAILURE);
 		}
 	}
-	return line;
-}	
-// TODO Write fscanf wrapper that takes fscanf output as input and
-// does error handling. i.e. scanErr(fscanf(...));
+	return str;
+}
+
+/**
+ * Prints error message with line number and exits with failure
+ * @param err error to be printed
+ * @param line_number
+ */
+void printParserError(char *err) {
+	fprintf(stderr, "%d: Invalid line: %s\n", line_number, err);
+	exit(EXIT_FAILURE);
+}
+
