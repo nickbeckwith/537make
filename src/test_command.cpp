@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <fstream>
 #include "catch.hpp"
 
 // include c headers
@@ -34,10 +35,16 @@ TEST_CASE("argc == 1 should be parsed correctly") {
 	REQUIRE(strcmp(argv[0], "gcc") == 0);
 }
 
-TEST_CASE("Runs a terminal cmd. Auto passes") {
-	char cmd[] = "echo hello";
+TEST_CASE("Checks to see if a file is created and deleted in terminal") {
+	char cmd[] = "touch .__tmp003";
 	runCommand(cmd);
-	// automatically passes
+	{
+		std::ifstream infile(".__tmp003");
+		REQUIRE(infile);
+	}
+	runCommand("rm .__tmp003");
+	std::ifstream infile(".__tmp003");
+	REQUIRE(!infile);
 }
 
 

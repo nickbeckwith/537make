@@ -15,10 +15,12 @@ char ** tokenizeCommand(char *cmd) {
 	return argv;
 }
 
-void runCommand(char *cmd) {
-	char **tokens = tokenizeCommand(cmd);
+void runCommand(const char *cmd) {
+	char cmd_mutable[MAX_BUF_LEN];
+	strcpy(cmd_mutable, cmd);
+	char **tokens = tokenizeCommand(cmd_mutable);
 	char *filename = *tokens;       // first token
-	char **argv = tokens + 1;       // the rest of the tokens
+	char **argv = tokens;
 	pid_t pid = fork();
 	int status;
 	if (pid == 0) {

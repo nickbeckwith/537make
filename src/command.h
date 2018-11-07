@@ -9,5 +9,5 @@ char ** tokenizeCommand(char *cmd);
 /**
  * Forks and runs command
  */
-void runCommand(char * cmd);
+void runCommand(const char * cmd);
 #endif //P3_COMMAND_H
