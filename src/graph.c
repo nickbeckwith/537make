@@ -66,8 +66,7 @@ void clearVisited(graph_t *graph) {
 	if (node_ptr != NULL) {
 		do {
 			((vertex_t *) node_ptr->data)->visited = 0;
-			node_ptr = node_ptr->next;
-		} while (node_ptr->next != NULL);
+		} while ((node_ptr = node_ptr->next) != NULL);
 	}
 }
 
@@ -119,6 +118,7 @@ vertex_t * isCyclic(graph_t *graph) {
 		} while (adj_node_ptr1 != NULL && (((vertex_t *)adj_node_ptr1->data)->visited == 1));
 		// while we pass visited nodes (we know the outcome) and while our ptr isn't null of course
 	}
+	clearVisited(graph);
 	return NULL;
 }
 

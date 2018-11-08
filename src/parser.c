@@ -24,6 +24,13 @@ void printParserErrorAndExit(const char *line);
 build_t * readBuild(FILE *file_pointer);
 
 
+/**
+ * checks if char is valid in filename
+ * @param c
+ * @return
+ */
+int isValidChar(char c) ;
+
 list_t * readAll(const char *filename) {
 	// open file and handle errors
 	FILE *fptr = fopen(filename, "r");
@@ -94,7 +101,7 @@ build_t * readBuild(FILE *file_pointer) {
 		}
 		// if alpha/digit character, build is done. Make sure to reset
 		// file pointer to where it was before consuming target line
-		if (isalpha(line_ptr[0]) | isdigit(line_ptr[0])) {
+		if (isValidChar(line_ptr[0])) {
 			fseek(file_pointer, file_ptr_locaiton, SEEK_SET);       // return to place before target
 			return build;
 		}
@@ -121,8 +128,8 @@ int * getTargetIndex(const char *targetLine) {
 	// first ensure first char is a readable char
 	int *ret_arr = (int *) mallocWrapper(2 * sizeof(int));
 	for (int i = 0; targetLine[i] != '\0'; i++) {
-		if (isalpha(targetLine[i]) | isdigit(targetLine[i])) {
-			// it's okay
+		if (isValidChar(targetLine[i])) {       // maybe next time go through
+			// it's okay                                                                    // all fat32 possible filenames
 		} else if (targetLine[i] == ':') {
 			ret_arr[0] = i;
 			ret_arr[1] = i;
@@ -130,7 +137,7 @@ int * getTargetIndex(const char *targetLine) {
 		} else {
 			// must be able to handle "all   : main.o" (multiple spaces"
 			for (int j = i; targetLine[j] != '\0'; j++) {
-				if (isalpha(targetLine[j]) | isdigit(targetLine[j])) {
+				if (isValidChar(targetLine[j])) {
 					printParserErrorAndExit(targetLine);
 				} else if (targetLine[j] == ':') {
 					ret_arr[0] = i;
@@ -192,3 +199,11 @@ void printParserErrorAndExit(const char *line) {
 	exit(EXIT_FAILURE);
 }
 
+/**
+ * checks if char is valid in filename
+ * @param c
+ * @return
+ */
+int isValidChar(char c) {
+	return isalpha(c) || isdigit(c) || c == '.' || c == '_';
+}

@@ -20,16 +20,6 @@ $(EXE): $(OBJECTS)
 	@$(CC) $(OBJECTS) $(CFLAGS) -o $(EXE)
 	@echo "Linking Complete!"
 
-test: $(TEST_OBJECTS) $(OBJECTS_WITHOUT_MAIN)
-	@$(CC++) $(TEST_OBJECTS) $(OBJECTS_WITHOUT_MAIN) -o test
-	./test
-
-test_parser.o: test_parser.cpp
-	@$(CC++) -c test_parser.cpp
-
-test_main.o: test_main.cpp
-	@$(CC++) -c test_main.cpp
-
 build_spec.o: build_spec.c build_spec.h
 	@$(CC) $(CFLAGS) -c build_spec.c
 	@echo "Compiled build_spec!"

@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_FAILURE);
 		}
 	}
-	if (optind != argc - 1) {
+	if ((optind != argc - 1) && argc != 1) {
 		fprintf(stderr, "%s", usage);
 		exit(EXIT_FAILURE);
 	} else {
@@ -82,13 +82,12 @@ int main(int argc, char *argv[]) {
 	while (ptr1 != NULL && ptr1->next != NULL) {
 		ptr2 = ptr1;
 		// iterate through the rest to find a comparison
-		while (ptr2->next != NULL) {
+		while ((ptr2 = ptr2->next) != NULL) {
 			if (isBuildEqual((build_t *) ptr1->data, (build_t *) ptr2->data)) { // if equality is found
 				fprintf(stderr, "make: *** Duplicate target: '%s'\tStop", ((build_t*)ptr1->data)->target);
 				exit(EXIT_FAILURE);
 
 			} // else if this ptr2 isn't equal
-			ptr2 = ptr2->next;
 		} // else move to next ptr1 to compare
 		ptr1 = ptr1->next;
 	}
@@ -135,7 +134,7 @@ int main(int argc, char *argv[]) {
 	if (target != NULL) {
 		tryRunVertex(graph, findVertexByTarget(graph, target));
 	} else {
-		tryRunVertex(graph, graph->vertices->head);
+		tryRunVertex(graph, graph->vertices->head->data);
 	}
 }
 
