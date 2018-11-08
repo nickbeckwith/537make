@@ -108,7 +108,6 @@ int main(int argc, char *argv[]) {
 
 	// populate with dependencies create builds for non-phony dependencies and add to vertices
 	ptr1 = graph->vertices->head;
-	build_t *temp_build;
 	vertex_t *temp_vertex;
 	while (ptr1 != NULL) {
 		// for each dependency in list, hook edge up
@@ -210,24 +209,20 @@ double getNewer(const char *f1, const char *f2) {
 }
 
 const char *getMakeFileName(const char *customName) {
-if (customName == NULL) {
-	if (isFile("makefile")) {
-		return "makefile";
-	} else if (isFile("Makefile")) {
-		return "Makefile";
+	if (customName == NULL) {
+		if (isFile("makefile")) {
+			return "makefile";
+		} else if (isFile("Makefile")) {
+			return "Makefile";
+		} else {
+			fprintf(stderr, "make: *** No makefile found.\tStop");
+			exit(EXIT_FAILURE);
+		}	
 	} else {
-
+		if (isFile(customName)) {
+			return customName;
+		} // else error no makefile found
+		fprintf(stderr, "make: *** No makefile found.\tStop");
+		exit(EXIT_FAILURE);
 	}
-} else {
-	if (isFile(customName)) {
-		return customName;
-	} // else error no makefile found
-	fprintf(stderr, "make: *** No makefile found.\tStop");
-	exit(EXIT_FAILURE);
 }
-}
-
-
-
-
-

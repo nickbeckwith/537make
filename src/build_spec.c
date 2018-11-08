@@ -25,7 +25,7 @@ void addDependent(build_t *build, char *dependent) {
 	addElem(build->dependents, dependent);
 }
 
-void addTarget(build_t *build, const char *target) {
+void addTarget(build_t *build, char *target) {
         build->target = target;
 }
 

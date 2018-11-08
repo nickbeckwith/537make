@@ -51,7 +51,7 @@ void addCmd(build_t *build, char *cmd);
  * @param build
  * @param target
  */
-void addTarget(build_t *build, const char *target);
+void addTarget(build_t *build, char *target);
 
 /**
  *

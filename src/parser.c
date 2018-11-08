@@ -176,7 +176,7 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 			fprintf(stderr, "%d: Invalid line: %s", line_number, str);
 			exit(EXIT_FAILURE);
 		}
-	} while (str[0] == '\n' & !feof(stream));
+	} while ((str[0] == '\n') && !feof(stream));
 	if (status == NULL) {
 		line_number--;          // don't count last line
 		if (feof(stream)) {
