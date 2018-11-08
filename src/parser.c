@@ -166,9 +166,11 @@ char * fgetsWrapper(char *str, int n, FILE *stream) {
 		if (status == NULL) {
 			break;          // if error or EOF get out of loop
 		}
+		if (str[0] == '#') {    // if comment
+			str[0] = '\n';
+		}
 		// if line doesn't have a new line and isn't EOF then
-		if (!strchr(str, '\n') & !feof(stream)) {
-			// make sure to print out entire line
+		if (!strchr(str, '\n') && !feof(stream)) {
 			while (!strchr(str, '\n')) {
 				fprintf(stderr, "%d: Invalid line: %s", line_number, str);
 				fgets(str, n, stream);
