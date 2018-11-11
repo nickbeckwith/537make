@@ -1,0 +1,48 @@
+The majority of changes required were freeing line buffers and ensuring that we weren't freeing null_ptrs. Allowing line buffers to be leaked was a massive memory concern and was fixed in parser.c 
+
+There were smaller memory leaks that came from not freeing the entire graph and build objects as well as freeing them multiple times. Freeing a list of vertices and not refreeing the list of edges between each vertex prevented the case of invalid frees. 
+
+The smaller memory leaks didn't have to be dealt with, but because a particular solution seemed fun, we did it anyway. The problem with freeing data in our list objects came because we used a generic list with a generic void pointer making it impossible to know how we have to free the data in the list. The data could be of type struct build_t, struct vertex_t or char * and each type had its own procedure to free the data. So we added a function pointer field in our list_node_t that pointed to the appropriate free function needed to free data. This field would be then used later in the freeList and freeNode functions to correctly free our data field. Definitely a fun solution.
+
+Changes by line number: format: old line number:new line number
+build_spec.c
+9:9     Build.target is allocated usually outside of initBuild so we shouldn't allocate memory for it
+17:17   freeBuild should not free if we pass in a null. Fixes invalid frees. This didn't need to be fixed really...
+25:28   Build.dependents is a list with data of type char*, should be freed with regular free function
+33:36   Similarily, commands should be freed with the built in free function
+
+command.c
+25:26   Fix clang error, execvp expects a non null argument so we should ensure that. This is twice handled though and probably didn't need to be fixed.
+41:46   Should free our command tokens afer use. This could be potentially a lot of memory
+
+graph.c
+13:14   Don't free graph if its null
+19:22   This created an invalid write. Mallocs need to be of size type, not size variable
+26:30   Don't free vertex unless it's nonnull
+32:39   Need to let list know that you free that data type with freeVertex(vertex_t)
+37:43   We were freeing vertices multiple times before and actually this would break freeGraph. Doing nothing to the edges allowed vertices to be freed sequentially in graph
+69:73   Just refactoring. I believe clang threw a warning about null somewhere
+
+list.c
+2:3     Need a graph module included now
+4:5     Change signature of list_node to allow for our free function ptr
+6:9     Assign f_ptr to node
+10:14   Chagne freeNode to use our free function pointer to free Node.data 
+21:32   When adding elements, need to add free function ptr
+33:44   Deleted recursive approach to freeing list
+47:45   New nonrecursie approach to freeing list. Just refactoring
+
+list.h
+Changes node_t struct to allow for a free function ptr adds comments
+
+main.c
+20:20:  Removes predecleration of getMakeFileName function to soothe clang
+102:95: Fixes invalidWrite. Previously was incorrectly casting build_t
+104:97: Same deal
+137:131:Now we actually free memory. Free graph then free that list of builds used earlier.
+
+parser.c
+There was a lot of changes here, but the biggest change was before we would dynamically allocate room for a line buffer then our build_t struct would point to different parts of the line buffer, not allocating seperate memory. Now, we duplicate each part of build_t such as target, cmds and dependents into dynamic memory to allow for easier freeing data. We also free the linebuffer at the end, making sure to keep a immutable ptr of the beginning of the line to allow us to free the entire line.
+
+tools.c
+12:13   Created doNothing. A function mostly used when you don't want to free the data field of a list node. For example, you don't want to free vertices in the list of edges since those will be freed by the graph sequentially. Needed to soothe clang by telling it to supress the fact that the regular void ptr that is usually in free functions will not be used.
