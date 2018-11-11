@@ -10,3 +10,7 @@ void * mallocWrapper(size_t size) {
 	}
 	return ptr;
 }
+
+void doNothing(__attribute__((unused)) void *ptr) {
+	// do nothing
+}

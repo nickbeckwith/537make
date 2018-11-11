@@ -17,13 +17,6 @@
  */
 const char *getMakeFileName(const char *customName);
 
-/**
- * Returns file name needed to be used
- * If non available, quit program and print error
- * @param customName custom name NULL if not used
- * @return
- */
-const char *getMakeFileName(const char *customName);
 
 /**
  *
@@ -99,9 +92,9 @@ int main(int argc, char *argv[]) {
 		addVertex(graph, initVertex(ptr1->data));       // each target as a vertex
 		// check if each target is phony
 		if (isFile(((build_t *) ptr1->data)->target)) {
-			((build_t *) ptr1)->isPhony = 0;
+			((build_t *) ptr1->data)->isPhony = 0;
 		} else {
-			((build_t *) ptr1)->isPhony = 1;
+			((build_t *) ptr1->data)->isPhony = 1;
 		}
 		ptr1 = ptr1->next;
 	}
@@ -135,6 +128,14 @@ int main(int argc, char *argv[]) {
 	} else {
 		tryRunVertex(graph, graph->vertices->head->data);
 	}
+
+	// free memory time
+	// this deeply frees all allocated data in graph including
+	// all lists and its data members
+	freeGraph(graph);
+	// free list of builds that wasn't used in the graph
+	freeList(list);
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -208,6 +209,12 @@ double getNewer(const char *f1, const char *f2) {
 	}
 }
 
+/**
+ * Returns file name needed to be used
+ * If non available, quit program and print error
+ * @param customName custom name NULL if not used
+ * @return
+ */
 const char *getMakeFileName(const char *customName) {
 	if (customName == NULL) {
 		if (isFile("makefile")) {

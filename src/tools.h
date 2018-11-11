@@ -5,4 +5,10 @@
 
 void * mallocWrapper(size_t);
 
+/**
+ * warning suppression is okay in this case.
+ * @param ptr does nothing
+ */
+void doNothing(__attribute__((unused)) void *ptr);
+
 #endif //P3_TOOLS_H

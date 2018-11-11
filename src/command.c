@@ -23,6 +23,10 @@ void runCommand(const char *cmd) {
 	char **argv = tokens;
 	pid_t pid = fork();
 	int status;
+	if (filename == NULL) {
+		fprintf(stderr, "Error: No commands found in cmd\n");
+		exit(EXIT_FAILURE);
+	}
 	if (pid == 0) {
 		// child process
 		if (execvp(filename, argv) == -1) {
@@ -39,6 +43,7 @@ void runCommand(const char *cmd) {
 			exit(EXIT_FAILURE);
 		}
 	}
+	free(tokens);
 }
 
 void runAllCommands(build_t *build) {

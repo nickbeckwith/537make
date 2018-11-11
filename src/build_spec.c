@@ -6,7 +6,7 @@
 
 build_t *initBuild() {
     build_t *build = (build_t *) mallocWrapper(sizeof(build_t));
-    build->target = (char *) mallocWrapper(MAX_BUF_LEN * sizeof(char));
+    build->target = NULL;
     build->dependents = initList();
     build->cmds = initList();
     build->isPhony = -1;
@@ -15,6 +15,9 @@ build_t *initBuild() {
 }
 
 void freeBuild(build_t *build) {
+	if (build == NULL) {
+		return;
+	}
 	free(build->target);
 	freeList(build->dependents);
 	freeList(build->cmds);
@@ -22,7 +25,7 @@ void freeBuild(build_t *build) {
 }
 
 void addDependent(build_t *build, char *dependent) {
-	addElem(build->dependents, dependent);
+	addElem(build->dependents, dependent, &free);
 }
 
 void addTarget(build_t *build, char *target) {
@@ -30,7 +33,7 @@ void addTarget(build_t *build, char *target) {
 }
 
 void addCmd(build_t *build, char *cmd) {
-	addElem(build->cmds, cmd);
+	addElem(build->cmds, cmd, &free);
 }
 
 int isBuildEqual(build_t *build1, build_t *build2) {

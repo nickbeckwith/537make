@@ -43,7 +43,7 @@ list_t * readAll(const char *filename) {
 	list_t *list = initList();
 	build_t *build;
 	while ((build = readBuild(fptr)) != NULL) {
-		addElem(list, build);
+		addElem(list, build, &doNothing);        // builds will be duplicated to graph and freed there
 	}
 	if (list->len == 0) {
 		fprintf(stderr, "make: *** No Targets.\tStop");
@@ -64,32 +64,49 @@ build_t * readBuild(FILE *file_pointer) {
     // get line of targets and dependents
 	char * line_ptr;
 	line_ptr = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
+	char *line_ptr_val = line_ptr;        // copy of pre-strtok (immutable)
     if (fgetsWrapper(line_ptr, MAX_BUF_LEN, file_pointer) == NULL) {
+    	free(line_ptr);
+    	freeBuild(build);
         return NULL;        // if EOF
     }
 
 	// Get target index and split the strings at that index to get target and dependents
 	int *index_arr = getTargetIndex(line_ptr);
-    char *target = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
-    strcpy(target, line_ptr);
-    target[index_arr[0]] = '\0';
+    line_ptr[index_arr[0]] = '\0';
+    char *target = strdup(line_ptr);
 	addTarget(build, target);
 	// increment line_ptr to get dependents
 	line_ptr = line_ptr + index_arr[1] + 1;
+	free(index_arr);
 
 	// Get dependents tokenized
 	char **tokens = (char **) mallocWrapper(MAX_BUF_LEN * sizeof(char *));
 	int tokens_count = 0;
-	tokens[tokens_count] = strtok(line_ptr, " \n");     // initialize and pass the first token
+	char *token;
+	token = strtok(line_ptr, " \n");
+	if (token == NULL) {
+		tokens[tokens_count] = NULL;
+	} else {
+		tokens[tokens_count] = strdup(token);     // create memory for a token
+	}
 	while (tokens[tokens_count] != NULL) {
 		tokens_count++;
-		tokens[tokens_count] = strtok(NULL, " \n");
+		token = strtok(NULL, " \n");
+		if (token == NULL) {
+			tokens[tokens_count] = NULL;
+		} else {
+			tokens[tokens_count] = strdup(token);       // don't want to malloc a null pointer
+		}
 	}
+	// line isn't needed anymore, we malloced each dependency and target
+	free(line_ptr_val);
 
 	// add all dependents 1 by 1
 	for (int i = 0; i < tokens_count; i++) {
 		addDependent(build, tokens[i]);
 	}
+	free(tokens);
 
 	long file_ptr_locaiton;
 	// Cmds: Set line pointer to new line, check for tab, set pointers in return file to each word
@@ -97,12 +114,14 @@ build_t * readBuild(FILE *file_pointer) {
 		line_ptr = (char *) mallocWrapper(sizeof(char) * MAX_BUF_LEN);
 		file_ptr_locaiton = ftell(file_pointer);
 		if (fgetsWrapper(line_ptr, MAX_BUF_LEN, file_pointer) == NULL) {
+			free(line_ptr);
 			return build;        // if EOF
 		}
 		// if alpha/digit character, build is done. Make sure to reset
 		// file pointer to where it was before consuming target line
 		if (isValidChar(line_ptr[0])) {
 			fseek(file_pointer, file_ptr_locaiton, SEEK_SET);       // return to place before target
+			free(line_ptr);
 			return build;
 		}
 		// check for tab
@@ -115,7 +134,8 @@ build_t * readBuild(FILE *file_pointer) {
 				line_ptr[i] = '\0';
 			}
 		}
-		addCmd(build, &line_ptr[1]);
+		addCmd(build, strdup(&line_ptr[1]));
+		free(line_ptr);
 	}
 }
 

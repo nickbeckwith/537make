@@ -1,11 +1,22 @@
 #include "list.h"
 #include "tools.h"
+#include "graph.h"
 
-node_t * initNode(void *data) {
+// data must by dynamically allocated
+node_t *initNode(void *data, void (*free_ptr)(void *)) {
 	node_t *node = (node_t *) mallocWrapper(sizeof(node_t));
 	node->data = data;
+	node->free_ptr = free_ptr;
 	node->next = NULL;
 	return node;
+}
+
+void freeNode(node_t *node) {
+	if (node == NULL) {
+		return;
+	}
+	node->free_ptr(node->data);
+	free(node);
 }
 
 
@@ -18,8 +29,8 @@ list_t *initList() {
 }
 
 // adds to tail in order to keep order where head is least recently added
-void addElem(list_t *list, void *data) {
-	node_t *node = initNode(data);
+void addElem(list_t *list, void *data, void (*free_ptr)(void *)) {
+	node_t *node = initNode(data, free_ptr);
 	if (list->head == NULL) {
 		list->head = node;
 		list->tail = node;
@@ -30,22 +41,15 @@ void addElem(list_t *list, void *data) {
 	list->len++;
 }
 
-/**
- * recursively frees node
- * and only node (not data)
- * @param node
- */
-void freeListHelper(node_t *node) {
-	if (node == NULL) {
-		return;
-	} else {
-		freeListHelper(node->next);     // need to start from the back of list
-		free(node);
-	}
-}
 
 void freeList(list_t *list) {
-	freeListHelper(list->head);
+	node_t *temp;
+	node_t *head = list->head;
+	while (head != NULL) {
+		temp = head;
+		head = head->next;
+		freeNode(temp);
+	}
 	free(list);
 }
 

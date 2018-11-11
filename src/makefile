@@ -2,7 +2,7 @@
 CC = gcc
 CC++ = g++
 # Compiler flags
-CFLAGS = -g -Wall -Wextra
+CFLAGS = -g -std=gnu11 -Wall -Wextra
 
 EXE = 537make
 
@@ -16,41 +16,41 @@ default: $(EXE)
 
 $(EXE): $(OBJECTS)
 	@$(CC) $(OBJECTS) $(CFLAGS) -o $(EXE)
-	echo "Linking Complete!"
+	@echo "Linking Complete!"
 
 build_spec.o: build_spec.c build_spec.h
 	@$(CC) $(CFLAGS) -c build_spec.c
-	echo "Compiled build_spec!"
+	@echo "Compiled build_spec!"
 
 command.o: command.c command.h
 	@$(CC) $(CFLAGS) -c command.c
-	echo "Compiled build_spec!"
+	@echo "Compiled command!"
 
 graph.o: graph.c graph.h
 	@$(CC) $(CFLAGS) -c graph.c
-	echo "Compiled build_spec!"
+	@echo "Compiled graph!"
 
 list.o: list.c list.h
 	@$(CC) $(CFLAGS) -c list.c
-	echo "Compiled build_spec!"
+	@echo "Compiled list!"
 
 main.o: main.c main.h
 	@$(CC) $(CFLAGS) -c main.c
-	echo "Compiled build_spec!"
+	@echo "Compiled main!"
 
 parser.o:	parser.c parser.h
 	@$(CC) $(CFLAGS) -c parser.c
-	echo "Compiled parser!"
+	@echo "Compiled parser!"
 
 tools.o:	tools.c tools.h
 	@$(CC) $(CFLAGS) -c tools.c
-	echo "Compiled tools!"
+	@echo "Compiled tools!"
 
 .PHONY: clean
 clean:
 	@rm -f *.o *.a $(EXE)
 	@rm -rf $(SCAN_BUILD_DIR)
-	echo "Cleaned!"
+	@echo "Cleaned!"
 
 .PHONY: scan-build
 scan-build: clean

@@ -11,12 +11,15 @@ graph_t *initGraph() {
 }
 
 void freeGraph(graph_t *graph) {
+	if (graph == NULL) {
+		return;
+	}
 	freeList(graph->vertices);
 	free(graph);
 }
 
 vertex_t *initVertex(build_t *build) {
-	vertex_t *vertex = (vertex_t *) mallocWrapper(sizeof(vertex));
+	vertex_t *vertex = (vertex_t *) mallocWrapper(sizeof(vertex_t));
 	vertex->build = build;
 	vertex->visited = 0;
 	vertex->edges = initList();
@@ -24,17 +27,21 @@ vertex_t *initVertex(build_t *build) {
 }
 
 void freeVertex(vertex_t *vertex) {
+	if (vertex == NULL) {
+		return;
+	}
+	freeBuild(vertex->build);
 	freeList(vertex->edges);
 	free(vertex);
 }
 
 void addVertex(graph_t *graph, vertex_t *vertex) {
-	addElem(graph->vertices, vertex);
+	addElem(graph->vertices, vertex, (void(*)(void*))&freeVertex);
 }
 
 void addEdge(vertex_t *from, vertex_t *to) {
-	addElem(from->edges, to);
-}
+	addElem(from->edges, to, &doNothing);        // edges shouldn't be freed. the vertices shoudl be
+}                                               // so default_e allows no freeing of vertex when calling freeNode
 
 vertex_t *findVertex(graph_t *graph, build_t *build) {
 	vertex_t *vertex = initVertex(build);
@@ -63,11 +70,12 @@ vertex_t *findVertexByTarget(graph_t *graph, const char * target) {
 
 void clearVisited(graph_t *graph) {
 	node_t *node_ptr = graph->vertices->head;
-	if (node_ptr != NULL) {
-		do {
-			((vertex_t *) node_ptr->data)->visited = 0;
-		} while ((node_ptr = node_ptr->next) != NULL);
+	if (node_ptr == NULL) {
+		return;
 	}
+	do {
+		((vertex_t *) node_ptr->data)->visited = 0;
+	} while ((node_ptr = node_ptr->next) != NULL);
 }
 
 /**
