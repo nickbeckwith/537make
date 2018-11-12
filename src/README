@@ -2,6 +2,8 @@ The majority of changes required were freeing line buffers and ensuring that we 
 
 There were smaller memory leaks that came from not freeing the entire graph and build objects as well as freeing them multiple times. Freeing a list of vertices and not refreeing the list of edges between each vertex prevented the case of invalid frees. 
 
+A major change was an invalid read that was caused from implicitly casting a list object to a build object.
+
 The smaller memory leaks didn't have to be dealt with, but because a particular solution seemed fun, we did it anyway. The problem with freeing data in our list objects came because we used a generic list with a generic void pointer making it impossible to know how we have to free the data in the list. The data could be of type struct build_t, struct vertex_t or char * and each type had its own procedure to free the data. So we added a function pointer field in our list_node_t that pointed to the appropriate free function needed to free data. This field would be then used later in the freeList and freeNode functions to correctly free our data field. Definitely a fun solution.
 
 Changes by line number: format: old line number:new line number
@@ -33,12 +35,14 @@ list.c
 47:45   New nonrecursie approach to freeing list. Just refactoring
 
 list.h
+Removed type_e enum originally used as a way to dynamically free data according to type
 Changes node_t struct to allow for a free function ptr adds comments
 
 main.c
 20:20:  Removes predecleration of getMakeFileName function to soothe clang
 102:95: Fixes invalidWrite. Previously was incorrectly casting build_t
 104:97: Same deal
+169:170:Now that build_t is being used correctly, should provide a way to iterate through the loop:)
 137:131:Now we actually free memory. Free graph then free that list of builds used earlier.
 
 parser.c
