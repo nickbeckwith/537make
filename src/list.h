@@ -1,8 +1,6 @@
 #ifndef P3_LIST_H
 #define P3_LIST_H
 
-enum type_e{char_arr_e, vertex_e, build_e, default_e};
-
 typedef struct node_t {
 	void *data;
 	void (*free_ptr)(void *);       // contains pointer to function that frees data

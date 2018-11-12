@@ -167,6 +167,7 @@ int tryRunVertex(graph_t *graph, vertex_t *vertex) {
 					run_cmd++;
 				}
 			}
+			ptr = ptr->next;
 		}
 	} else { // else target name phony and should update
 		run_cmd++;
