@@ -1,3 +1,4 @@
+// Nick Beckwith, netID: nbeckwith2; Matthew Strimaitis, netID: strimaitis
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
