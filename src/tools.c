@@ -1,3 +1,4 @@
+// Nick Beckwith, netID: nbeckwith2; Matthew Strimaitis, netID: strimaitis
 #include <stdlib.h>
 #include <stdio.h>
 #include "tools.h"
