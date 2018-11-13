@@ -1,3 +1,4 @@
+// Nick Beckwith, netID: nbeckwith2; Matthew Strimaitis, netID: strimaitis
 #ifndef P3_COMMAND_H
 #define P3_COMMAND_H
 
